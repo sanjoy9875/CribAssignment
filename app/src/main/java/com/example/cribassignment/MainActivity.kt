@@ -62,6 +62,8 @@ class MainActivity : AppCompatActivity() {
         mBtnFetchData.setOnClickListener {
 
             mTvText.text = ""
+            list.clear()
+            listView.visibility = View.GONE
 
             /**
              * Starting a Coroutine and fetching sms
@@ -70,12 +72,18 @@ class MainActivity : AppCompatActivity() {
                 mProgressBar.post {
                     mProgressBar.visibility = View.VISIBLE
                 }
-                list.clear()
+                listView.post {
+                    listView.visibility = View.GONE
+                }
+
                 val ph = mEtNumber.text.toString()
                 val d = mEtDays.text.toString()
 
                 if (ph.isEmpty() || d.isEmpty()) {
                     list.clear()
+                    listView.post {
+                        listView.visibility = View.GONE
+                    }
                     mTvText.post {
                         mTvText.text = "Sorry,no messages found"
                     }
@@ -84,6 +92,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                 } else if (ph.isNotEmpty() && d.isNotEmpty()) {
+                    list.clear()
                     val uri = Uri.parse("content://sms/inbox")
                     val cursor = contentResolver.query(uri, null, null, null, null)
                     while (cursor?.moveToNext() == true) {
@@ -103,6 +112,10 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     if (list.size > 0) {
+                        listView.post {
+                            listView.visibility = View.VISIBLE
+                        }
+
                         mTvText.post {
                             mTvText.text = "${list.size.toString()} messages found"
                         }
@@ -113,6 +126,9 @@ class MainActivity : AppCompatActivity() {
 
                     } else {
                         list.clear()
+                        listView.post {
+                            listView.visibility = View.GONE
+                        }
                         mTvText.post {
                             mTvText.text = "Sorry,no messages found"
                         }
@@ -125,13 +141,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         /**
-         * Setting the list in our ListView
+         * Setting the list(messages) in our ListView
          */
         val adapter = ArrayAdapter(this,android.R.layout.simple_list_item_1,list)
         listView.adapter = adapter
 
     }
-
 
     /**
      * Calculate days from two DATES(dd-mm-yyyy | dd-mm-yyyy)
